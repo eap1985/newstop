@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block newstop_title %}Редактор событий{% endblock %}</title>
+        {% block newstop_stylesheets %}
+            {{ encore_entry_link_tags('newstop-editor-styles') }}
+
+        {% endblock %}
+    </head>
+    <body>
+    in bunlde NewsTop
+        <div class="content">
+            {% block newstop_body %}{% endblock %}
+        </div>
+
+    {% block javascripts %}
+
+    {% endblock %}
+    </body>
+</html>

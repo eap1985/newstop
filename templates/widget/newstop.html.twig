@@ -1,0 +1,87 @@
+{# A few twig macroses for pretty date foramatting in template #}
+{% macro event_duration(event) %}
+    {% if date('now'|date('Y-m-d')) == date(event.startsAt|date('Y-m-d')) %}
+        Сегодня
+    {% elseif event.endsAt is not null %}
+        {{ event.startsAt.format('d.m.Y') }} - {{ event.endsAt.format('d.m.Y') }}
+    {% else %}
+        {{ event.startsAt | ru_date }}
+    {% endif %}
+{% endmacro %}
+
+{% macro is_today(event) %}
+    {% if date('now'|date('Y-m-d')) == date(event.startsAt|date('Y-m-d')) %}
+        today
+    {% endif %}
+{% endmacro %}
+
+{% macro is_past(startDate, endDate) %}
+    {% if endDate is not empty %}
+        {% if endDate < date() %}
+            event_past
+        {% endif %}
+    {% else %}
+        {% if startDate < date() %}
+            event_past
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+{# Import these macroses as a variable from the same file#}
+{% import _self as eventType %}
+
+{# Template itself #}
+<div class="twtr-bd">
+
+    <div class="twtr-timeline">
+
+        <div class="twtr-tweets">
+
+            <div class="twtr-reference-tweet"></div>
+
+            {% for event in events %}
+                <div id="tweet-id-template" class="twtr-tweet">
+
+                    <div class="twtr-tweet-wrap">
+
+                        <div class="twtr-avatar">
+
+                            <div class="twtr-img">
+                                <a href="{{ path('newstop.show',{id: event.id}) }}" target="_blank">
+                                    <img src="{{ asset( event.si) | imagine_filter('my_thumb') }}"/>
+                                </a>
+                            </div>
+
+                        </div>
+
+                        <div class="twtr-tweet-text">
+                            <p>
+                                <a class="twtr-user" href="{{ path('newstop.show', {'id': event.id}) }}" target="_blank">{{ event.avtor }}</a> {{ event.name }}
+                            </p>
+                            <em>
+                                    {% if event.time is not empty %}
+                                        {{ event.time | ru_datetime }} — {{ event.arhiv | ru_datetime }}
+                                    {% else %}
+                                        {{ event.time | ru_datetime }}
+                                    {% endif %}
+                                <a href="{{ path('newstop.show', {'id': event.id}) }}" class="twtr-reply" target="_blank">читать</a></em>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+                К сожалению, событий, удовлетворяющих условиям поиска, не обнаружено.
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <div class="twtr-fade"></div>
+
+</div>
+
+<!-- Конец -->
+</div>

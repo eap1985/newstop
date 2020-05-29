@@ -1,0 +1,26 @@
+parameters:
+    enable_soft_delete: true
+
+services:
+    # Конфигурация по умолчанию (только для этого файла)
+    _defaults:
+        # Включает механизм автоматической подстановки зависимостей контейнера в ваши сервисы
+        autowire: true
+        # Включает механизм автоконфигурации
+        autoconfigure: true
+
+    # Явно регистриурум контроллеры бандла и репозиторий как DI-сервисы
+    eap1985\NewsTopBundle\Repository\NewsTopRepository: ~
+    eap1985\NewsTopBundle\Controller\NewsTopController: ~
+    eap1985\NewsTopBundle\Controller\NewsTopAjaxController: ~
+    eap1985\NewsTopBundle\Controller\NewsTopEditorController:
+        arguments:
+            $enableSoftDelete: '%eap1985.newstop.enable_soft_delete%'
+
+    # Фильтр Twig для форматирования даты
+    eap1985\NewsTopBundle\Twig\TwigRuDateFilter: ~
+
+    # Регистрируем все классы компонента EventExporter как DI-сервисы
+    #bravik\CalendarBundle\Service\EventExporter\:
+    #   resource: '../src/Service/EventExporter/*'
+

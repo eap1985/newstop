@@ -1,0 +1,62 @@
+﻿	.twtr-bd {
+	margin: 10px;
+	width: 460px;
+	position: relative;
+	overflow: hidden;
+
+	}
+
+	.twtr-timeline {
+	overflow: hidden;
+	height: 330px;
+	}
+
+	.twtr-tweet {
+    height: 90px;
+	overflow: hidden;
+    opacity: 1;
+    border-bottom-color: #EEEEEE;
+    border-bottom-style: solid;
+    border-bottom: 1px dotted #DDDDDD;
+    
+	
+	}
+	
+	.twtr-tweet-wrap {
+	 padding: 8px 0;
+	}
+	
+	.twtr-avatar {
+	position: relative;
+    top: 2px;
+	height: 48px;
+    margin-bottom: 5px;
+    width: 48px;
+	float:left;
+	}
+	
+	.twtr-img a,.twtr-img img{
+	border:none;
+	text-decoration:none;
+	}
+	
+	.twtr-tweet-text {
+    margin-left: 58px;
+	}
+	
+	.twtr-tweet-text p {
+	line-height: 18px !important;
+	margin: 0;
+	}
+	
+
+ .twtr-fade {
+    background: url("../images/gradient.png") repeat-x scroll center bottom transparent;
+    bottom: 0;
+    height: 36px;
+    left: 0;
+    position: absolute;
+    width: 460px;
+    z-index: 10;
+}
+
