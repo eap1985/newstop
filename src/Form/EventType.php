@@ -20,22 +20,25 @@ class EventType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Название'
+                'label' => 'Название','attr' => ['class' => 'form-control']
             ])
             ->add('time', DateTimeType::class, [
                 'label' => 'Начало',
                 'widget' => 'single_text',
+                'attr' => ['class' => 'form-control']
             ])
             ->add('arhiv', DateTimeType::class, [
                 'label' => 'Конец',
                 'widget' => 'single_text',
+                'attr' => ['class' => 'form-control']
             ])
-            ->add('opisanie', TextareaType::class, ['label' => 'Описание','attr' => ['class' => 'tinymce']])
-            ->add('avtor', TextType::class, ['label' => 'Автор'])
-            ->add('metka', TextType::class, ['label' => 'Раздел'])
+            ->add('opisanie', TextareaType::class, ['label' => 'Описание','attr' => ['class' => 'tinymce form-control']])
+            ->add('avtor', TextType::class, ['label' => 'Автор','attr' => ['class' => 'form-control']])
+            ->add('metka', TextType::class, ['label' => 'Раздел','attr' => ['class' => 'form-control']])
             ->add('archived', CheckboxType::class, [
                 'label' => 'В архиве',
-                'required' => false
+                'required' => false,
+                'attr' => ['class' => 'form-check-input']
             ])->addEventListener(
                 FormEvents::SUBMIT,
                 [$this, 'onSubmit']

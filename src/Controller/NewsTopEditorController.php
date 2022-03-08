@@ -13,18 +13,23 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
+use Symfony\Component\Security\Core\Security;
+
 /**
  * @Route("/newstop", name="editor.")
  */
 class NewsTopEditorController extends AbstractController
 {
+    private $security;
+
     /** @var EventRepository */
     private $eventRepository;
 
     public $isSoftDeleteEnabled;
 
-    public function __construct(NewsTopRepository $eventRepository, bool $enableSoftDelete = false)
+    public function __construct(NewsTopRepository $eventRepository, bool $enableSoftDelete = false,Security $security )
     {
+        $this->security = $security;
         $this->eventRepository = $eventRepository;
         $this->isSoftDeleteEnabled = $enableSoftDelete;
     }
@@ -35,7 +40,18 @@ class NewsTopEditorController extends AbstractController
     public function index(EntityManagerInterface $em, PaginatorInterface $paginator, Request $request): Response
     {
         $events = $this->eventRepository->findAll();
-        dump($events);
+
+        $user =$this->security->getUser();
+
+/*
+        dump($user->getEmail());
+        dump($user->getRoles());
+        $user->setRoles(['ROLE_ADMIN','ROLE_SUPER_ADMIN']);
+
+        $em->persist($user);
+        $em->flush();*/
+        //dump($events);
+
         $dql   = "SELECT n FROM NewsTopBundle:NewsTop n";
         $query = $em->createQuery($dql);
         foreach( $events as &$event) {

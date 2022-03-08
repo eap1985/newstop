@@ -2,6 +2,7 @@
 namespace eap1985\NewsTopBundle\DependencyInjection;
 
 use eap1985\NewsTopBundle\Controller\NewsTopEditorController;
+use eap1985\NewsTopBundle\Controller\NewsTopController;
 use Exception;
 use Liip\ImagineBundle\Service\FilterService;
 use Symfony\Component\Config\FileLocator;
@@ -20,14 +21,11 @@ class NewsTopExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        //dd($configs);
+
 
         $container->registerForAutoconfiguration(FilterService::class)
             ->addTag('eap1985.newstop.exporter');
-
-
-
-        $loader = new YamlFileLoader(
+         $loader = new YamlFileLoader(
             $container,
             new FileLocator(__DIR__.'/../../config')
         );
@@ -36,18 +34,22 @@ class NewsTopExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-
+        //dd( $config['enable_soft_delete']);
         $container->setParameter(
             'eap1985.newstop.enable_soft_delete',
             $config['enable_soft_delete']
         );
 
-
+        $definition = $container->getDefinition(NewsTopController::class);
+        $definition->setArguments([
+            '$enableSoftDelete' => false,
+        ]);
 
         $definition = $container->getDefinition(NewsTopEditorController::class);
         $definition->setArguments([
             '$enableSoftDelete' => $config['enable_soft_delete'],
         ]);
+
     }
 
 }

@@ -5,6 +5,10 @@ namespace eap1985\NewsTopBundle\Entity;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -45,6 +49,15 @@ class NewsTop
      * @ORM\Column(type="datetime",options={"default": "CURRENT_TIMESTAMP"})
      */
     private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="\App\Entity\Category", inversedBy="blogPosts")
+     */
+    private $category;
+
+    public function __toString() {
+        return $this->name;
+    }
 
     /**
      * @return mixed
@@ -300,6 +313,16 @@ class NewsTop
         return $this->id;
     }
 
+    public function setCategoryId($category)
+    {
+
+        return $this->category = $category;
+        return $this;
+    }
+    public function getCategoryId()
+    {
+        return $this->category;
+    }
     public function getName(): ?string
     {
         return $this->name;
