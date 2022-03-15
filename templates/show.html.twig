@@ -13,10 +13,10 @@
         <div class="row">
             <div class="col">
                 <div class="event__info-block event-date">
-                    {% if event.time is not empty %}
-                        {{ event.time | ru_datetime }} — {{ event.arhiv | ru_datetime }}
+                    {% if event.createdAt is not empty %}
+                        {{ event.createdAt | ru_datetime }}
                     {% else %}
-                        {{ event.time | ru_datetime }}
+                        {{ event.createdAt | ru_datetime }}
                     {% endif %}
                 </div>
 
@@ -31,7 +31,11 @@
         <div>
             {{ event.opisanie | raw }}
         </div>
-
+        {% if event.node is not null and event.bodyValue is not null %}
+            <div>
+             {{ event.bodyValue | raw }}
+            </div>
+        {% endif %}
         <br>
 
         <h4>Автор</h4>

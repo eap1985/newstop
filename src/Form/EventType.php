@@ -22,13 +22,8 @@ class EventType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Название','attr' => ['class' => 'form-control']
             ])
-            ->add('time', DateTimeType::class, [
+            ->add('createdAt', DateTimeType::class, [
                 'label' => 'Начало',
-                'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('arhiv', DateTimeType::class, [
-                'label' => 'Конец',
                 'widget' => 'single_text',
                 'attr' => ['class' => 'form-control']
             ])

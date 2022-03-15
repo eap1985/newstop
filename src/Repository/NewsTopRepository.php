@@ -27,6 +27,13 @@ class NewsTopRepository extends ServiceEntityRepository
         ]);
     }
 
+    public function findBySlug($slug): NewsTop
+    {
+        return $this->findOneBy([
+            'slug' => $slug,
+            'archived' => false
+        ]);
+    }
     /**
      * @return NewsTop[]
      */
@@ -36,4 +43,13 @@ class NewsTopRepository extends ServiceEntityRepository
             'archived' => false,
         ]);
     }
+
+    /**
+     * @return NewsTop[]
+     */
+    public function findLatestNews(): array
+    {
+        return $this->findBy(array('archived' => false), array('createdAt' => 'ASC'), 5);
+    }
+
 }

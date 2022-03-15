@@ -9,8 +9,8 @@
     {% endblock %}
 
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<body class="mrg">
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Юрист</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,16 +100,25 @@
                 </div>
             </div>
         </div>
+
         <div class="col-9">
             <div class="content">
                 {% block newstop_body %}{% endblock %}
+
             </div>
 
-
+            <div class="col-10">
+                <div class="container">
+                <h3>Последние статьи</h3>
+                <ul>
+                    {% for news in newstop %}
+                        <li><a href="{{ path('newstop.show', { slug: news.slug }) }}">{{ news }}</a></li>
+                    {% endfor %}
+                </ul>
+                </div>
+            </div>
         </div>
-        <div class="col-1">
 
-        </div>
     </div>
 </div>
 {% block javascripts %}
@@ -123,13 +132,17 @@
         <div class="col">
             <h2>Mix and match</h2>
             Don’t want your columns to simply stack in some grid tiers? Use a combination of different classes for each tier as needed. See the example below for a better idea of how it all works.</div>
-        <div class="col">col</div>
-        <div class="col">col</div>
-        <div class="col">col</div>
+        <div class="col"><h2>Mix and match</h2>
+            Don’t want your columns to simply stack in some grid tiers? Use a combination of different classes for each tier as needed. See the example below for a better idea of how it all works.</div>
+        <div class="col"><h2>Mix and match</h2>
+            Don’t want your columns to simply stack in some grid tiers? Use a combination of different classes for each tier as needed. See the example below for a better idea of how it all works.</div>
+        <div class="col"><h2>Mix and match</h2>
+            Don’t want your columns to simply stack in some grid tiers? Use a combination of different classes for each tier as needed. See the example below for a better idea of how it all works.</div>
     </div>
+    <div class="bottom-line border-bottom"></div>
     <div class="row">
-        <div class="col-8">col-8</div>
-        <div class="col-4">col-4</div>
+        <div class="col-8">This is the first item's accordion body. It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the .accordion-body, though the transition does limit overflow.</div>
+        <div class="col-4">Don’t want your columns to simply stack in some grid tiers? Use a combination of different classes for each tier as needed. See the example below for a better idea of how it all works.</div>
     </div>
 </div>
 </body>

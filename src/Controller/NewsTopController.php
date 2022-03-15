@@ -23,7 +23,7 @@ class NewsTopController extends AbstractController
 
     public function __construct(NewsTopRepository $eventRepository,bool $enableSoftDelete = false)
     {
-        dump($enableSoftDelete);
+
         $this->enableSoftDelete = $enableSoftDelete;
         $this->eventRepository = $eventRepository;
     }
@@ -65,21 +65,23 @@ class NewsTopController extends AbstractController
     }
 
     /**
-     * @Route("/{id}.html", name="show", methods={"GET"})
+     * @Route("/{slug}.html", name="show", methods={"GET"})
      */
-    public function show(int $id): Response
+    public function show($slug): Response
     {
-        $event = $this->getEvent($id);
 
+        $event = $this->getEvent($slug);
+
+        //dd($event->getNode()->getBodyValue());
         return $this->render('@NewsTop/show.html.twig', [
             'event' => $event
         ]);
     }
 
 
-    private function getEvent(int $id): NewsTop
+    private function getEvent($slug): NewsTop
     {
-        if (!$event = $this->eventRepository->findNotArchived($id)) {
+        if (!$event = $this->eventRepository->findBySlug($slug)) {
             throw new NotFoundHttpException();
         }
 

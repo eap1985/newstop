@@ -9,15 +9,19 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * @ORM\Table(name="newstop")
  * @ORM\Entity
  * @Vich\Uploadable()
  * @Assert\Callback("validate")
+ * @UniqueEntity("slug")
  */
 class NewsTop
 {
@@ -28,6 +32,43 @@ class NewsTop
      * @ORM\Column(type="integer")
      */
     private $id;
+
+    /**
+     * @ORM\OneToOne(targetEntity="eap1985\NewsTopBundle\Entity\NewsBody",cascade={"remove"},mappedBy="NewsBody")
+     * @ORM\JoinColumns( { @ORM\JoinColumn(name="node", referencedColumnName="id", onDelete="CASCADE" ) } )
+    */
+
+    private $node;
+    // generated getter and setter
+    public function setNode(NewsBody $node = null) : NewsBody
+    {
+        $this->node = $node;
+        return $this;
+    }
+
+    public function getNode() {
+        return $this->node;
+    }
+
+    private $bodyValue;
+    // generated getter and setter
+
+    public function getBodyValue($created = null) {
+
+        if(!empty($this->node)) {
+            return $this->node->getBodyValue();
+        }
+
+        return $this->bodyValue;
+    }
+
+    // generated getter and setter
+    public function setBodyValue($string = '-')
+    {
+
+        $this->bodyValue = $string;
+        return $this;
+    }
 
     /**
      * @var string|null
@@ -55,6 +96,55 @@ class NewsTop
      */
     private $category;
 
+    /**
+     * @ORM\Column(type="string", length=255, unique=true)
+     *
+     */
+    private $slug;
+
+
+    public function createNode($conference,$entityManager)
+    {
+        $request = Request::createFromGlobals();
+        $body_value = $request->request->get('body_value', 'default category');
+
+        $this->node = new NewsBody();
+
+        $this->node->setBundle('newstop');
+        $this->node->setEntityId($conference->getId());
+
+        $this->node->setBodyValue($conference->bodyValue);
+        $this->node->setLangcode('ru');
+        $this->node->setDelta(1);
+        $this->node->setRevisionId(1);
+        $this->node->setDeleted(0);
+        // сообщите Doctrine, что вы хотите (в итоге) сохранить Продукт (пока без запросов)
+        $entityManager->persist( $this->node);
+
+        // действительно выполните запросы (например, запрос INSERT)
+        $entityManager->flush();
+    }
+
+    public function computeSlug(SluggerInterface $slugger)
+    {
+
+
+            $this->slug = (string) $slugger->slug((string) $this)->lower();
+
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
     public function __toString() {
         return $this->name;
     }
@@ -68,8 +158,13 @@ class NewsTop
     }
 
     /**
-     * @param mixed $createdAt
+     * @ORM\PrePersist
      */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
     public function setCreatedAt($createdAt): void
     {
         $this->createdAt = $createdAt;
@@ -194,9 +289,15 @@ class NewsTop
     }
 
 
-    public function setThumbnail(?string $thumbnail): self
+    public function setThumbnail(?string $thumbnail = 'no'): self
     {
-        $this->thumbnail = $thumbnail;
+
+        if(!empty($thumbnail)) {
+            $this->thumbnail = $thumbnail;
+        } else {
+            $this->thumbnail = 'no';
+        }
+        return $this;
     }
 
     /**
@@ -219,6 +320,7 @@ class NewsTop
 
     public function setThumbnailFile($thumbnailFile): void
     {
+
         $this->thumbnailFile = $thumbnailFile;
         if($this->thumbnailFile) {
             $this->updatedAt = new DateTime();
@@ -228,7 +330,7 @@ class NewsTop
     /**
      * @var string
      *
-     * @ORM\Column(name="razdel", type="string", length=50, nullable=false)
+     * @ORM\Column(name="razdel", type="string", length=50, nullable=true)
      */
     private $razdel;
 
@@ -242,30 +344,17 @@ class NewsTop
     /**
      * @var int
      *
-     * @ORM\Column(name="count", type="integer", nullable=false)
+     * @ORM\Column(name="count", type="integer", nullable=true)
      */
     private $count;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="comment", type="integer", nullable=false)
+     * @ORM\Column(name="comment", type="integer", nullable=true)
      */
     private $comment;
 
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="time", type="datetime", nullable=false)
-     */
-    private $time;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="arhiv", type="datetime", nullable=false)
-     */
-    private $arhiv;
 
     /**
      * @var string|null
@@ -277,21 +366,21 @@ class NewsTop
     /**
      * @var string
      *
-     * @ORM\Column(name="si", type="string", length=255, nullable=false)
+     * @ORM\Column(name="si", type="string", length=255, nullable=true)
      */
     private $si;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="bi", type="string", length=255, nullable=false)
+     * @ORM\Column(name="bi", type="string", length=255, nullable=true)
      */
     private $bi;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="metka", type="string", length=255, nullable=false)
+     * @ORM\Column(name="metka", type="string", length=255, nullable=true)
      */
     private $metka;
 
@@ -312,6 +401,7 @@ class NewsTop
     {
         return $this->id;
     }
+
 
     public function setCategoryId($category)
     {
@@ -395,29 +485,6 @@ class NewsTop
         return $this;
     }
 
-    public function getTime(): ?\DateTimeInterface
-    {
-        return $this->time;
-    }
-
-    public function setTime(\DateTimeInterface $time): self
-    {
-        $this->time = $time;
-
-        return $this;
-    }
-
-    public function getArhiv(): ?\DateTimeInterface
-    {
-        return $this->arhiv;
-    }
-
-    public function setArhiv(\DateTimeInterface $arhiv): self
-    {
-        $this->arhiv = $arhiv;
-
-        return $this;
-    }
 
     public function getHref(): ?string
     {
