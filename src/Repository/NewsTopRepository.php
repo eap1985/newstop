@@ -49,7 +49,7 @@ class NewsTopRepository extends ServiceEntityRepository
      */
     public function findLatestNews(): array
     {
-        return $this->findBy(array('archived' => false), array('createdAt' => 'ASC'), 5);
+        return $this->findBy(array('archived' => false), array('createdAt' => 'DESC'), 5);
     }
 
 }

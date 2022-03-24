@@ -2,7 +2,10 @@
 
 {% block newstop_title %}{{ event.name }}{% endblock %}
 
+
+
 {% block newstop_body %}
+
     <div class="container">
         <div class="row align-items-center">
             <div class="col">
@@ -40,8 +43,35 @@
 
         <h4>Автор</h4>
         <p>{{ event.avtor }}</p>
+
+
+    <h2>Add your own feedback</h2>
+    {{ form(comment_form) }}
+
+    {% if comments|length > 0 %}
+        <div>There are {{ comments|length }} comments.</div>
+
+        {% for comment in comments %}
+{#            {% if comment.photofilename %}
+                <img src="{{ asset('uploads/photos/' ~ comment.photofilename) }}" />
+            {% endif %}#}
+
+            <h4>{{ comment.author }}</h4>
+            <small>
+                {{ comment.createdAt|format_datetime('medium', 'short') }}
+            </small>
+
+            <p>{{ comment.text }}</p>
+        {% endfor %}
+
+        {% if previous >= 0 %}
+            <a href="{{ path('newstop.show', { slug: event.slug, offset: previous }) }}">Previous</a>
+        {% endif %}
+        {% if next < comments|length %}
+            <a href="{{ path('newstop.show', { slug: event.slug, offset: next }) }}">Next</a>
+        {% endif %}
+    {% else %}
+        <div>No comments have been posted yet for this conference.</div>
+    {% endif %}
     </div>
-
-
-
 {% endblock %}

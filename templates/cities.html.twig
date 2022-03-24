@@ -1,0 +1,9 @@
+{% set values = [0 ,10, 20, 30, 40, 50] %}
+{% for val in values  %}
+    {% if val == select %}
+        {% set selected = 'selected' %}
+    {% else %}
+        {% set selected = '' %}
+    {% endif %}
+    <option {{ selected }} value="{{ val }}">Скидка {{ val }}%</option>
+{% endfor %}

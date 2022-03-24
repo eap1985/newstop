@@ -2,9 +2,13 @@
 
 namespace eap1985\NewsTopBundle\Entity;
 
+use App\Entity\Comment;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Persistence\ManagerRegistry;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -42,6 +46,7 @@ class NewsTop
     // generated getter and setter
     public function setNode(NewsBody $node = null) : NewsBody
     {
+
         $this->node = $node;
         return $this;
     }
@@ -65,8 +70,8 @@ class NewsTop
     // generated getter and setter
     public function setBodyValue($string = '-')
     {
-
         $this->bodyValue = $string;
+        if(!empty($this->node)) $this->node->setBodyValue($string);
         return $this;
     }
 
@@ -124,6 +129,7 @@ class NewsTop
         // действительно выполните запросы (например, запрос INSERT)
         $entityManager->flush();
     }
+
 
     public function computeSlug(SluggerInterface $slugger)
     {
@@ -349,14 +355,6 @@ class NewsTop
     private $count;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(name="comment", type="integer", nullable=true)
-     */
-    private $comment;
-
-
-    /**
      * @var string|null
      *
      * @ORM\Column(name="href", type="string", length=50, nullable=true)
@@ -391,10 +389,26 @@ class NewsTop
      */
     private $archived;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="newsTop", orphanRemoval=true)
+     */
+    private $comments;
+
+    /**
+     * @ORM\Column(type="smallint", options={"default" : 0})
+     */
+    private $sale;
+
+    /**
+     * @ORM\Column(type="integer", options={"default" : 0})
+     */
+    private $saletype;
+
     public function __construct()
     {
         $this->createdAt = new DateTime();
         $this->updatedAt = new DateTime();
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -473,18 +487,6 @@ class NewsTop
         return $this;
     }
 
-    public function getComment(): ?int
-    {
-        return $this->comment;
-    }
-
-    public function setComment(int $comment): self
-    {
-        $this->comment = $comment;
-
-        return $this;
-    }
-
 
     public function getHref(): ?string
     {
@@ -542,6 +544,60 @@ class NewsTop
     public function setArchived(bool $archived): self
     {
         $this->archived = $archived;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): self
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments[] = $comment;
+            $comment->setNewsTop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): self
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getNewsTop() === $this) {
+                $comment->setNewsTop(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSale(): ?int
+    {
+        return $this->sale;
+    }
+
+    public function setSale(int $sale): self
+    {
+        $this->sale = $sale;
+
+        return $this;
+    }
+
+    public function getSaletype(): ?int
+    {
+        return $this->saletype;
+    }
+
+    public function setSaletype(int $saletype): self
+    {
+        $this->saletype = $saletype;
 
         return $this;
     }

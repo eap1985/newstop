@@ -23,21 +23,24 @@ class NewsTopEntityListener
     public function prePersist(NewsTop $conference, LifecycleEventArgs $event)
     {
         $conference->computeSlug($this->slugger);
-
-
-
-
     }
-    public function postPersist(NewsTop $entity,LifecycleEventArgs $args)
+
+    public function postPersist(NewsTop $entity, LifecycleEventArgs $args)
     {
 
         $entityManager = $args->getObjectManager();
+        $entity->createNode($entity, $entityManager);
+    }
 
-        $entity->createNode($entity,$entityManager);
+    public function postUpdate(NewsTop $entity, LifecycleEventArgs $args)
+    {
+        $entityManager = $args->getObjectManager();
+
     }
 
     public function preUpdate(NewsTop $conference, LifecycleEventArgs $event)
     {
+
         $conference->computeSlug($this->slugger);
     }
 }
