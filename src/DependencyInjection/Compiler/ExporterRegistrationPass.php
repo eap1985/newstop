@@ -22,6 +22,7 @@ class ExporterRegistrationPass implements CompilerPassInterface
 
         $taggedServices = $container->findTaggedServiceIds('eap1985.newstop.liip');
 
+
         $exporterReferences = [];
         foreach ($taggedServices as $id => $tags) {
            // dump($id);

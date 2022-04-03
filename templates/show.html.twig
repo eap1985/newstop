@@ -24,7 +24,13 @@
                 </div>
 
                 {% if event.razdel is not empty %}
-                    <div class="event__info-block event-place">{{ event.razdel }}</div>
+                    <div class="event__info-block event-place"><i class="fas fa-tags"></i> {{ event.razdel }}</div>
+                {% endif %}
+                {% if event.categoryId is not empty %}
+                    <div class="event__info-block event-place"><i class="fas fa-list"></i> {#{{ event.categoryId }}#}</div>
+                <div class="event__info-block event-place">
+                    {{ select | raw }}
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -36,42 +42,54 @@
         </div>
         {% if event.node is not null and event.bodyValue is not null %}
             <div>
-             {{ event.bodyValue | raw }}
+                {{ event.bodyValue | raw }}
             </div>
         {% endif %}
-        <br>
 
+        {% for image in event.images %}
+            {% dump(image) %}
+            <div style="float:left;margin-right: 5px"><a href="{{ image.url }}{{ image.name }}" class="group1"><img
+                            class="img-thumbnail" src="{{ asset(image.thumbnailurl) }}"/> </a></div>
+        {% endfor %}
+        <div class="myclr"></div>
+        <br>
+        {% if event.pdf is not null %}
+            <h4>Файлы</h4>
+            <p><i class="fas fa-file-alt"></i><a download
+                                                 href="{{ vich_uploader_asset(event,'pdfFile') }}">Скачать {{ event.pdf }}</a>
+            </p>
+        {% endif %}
         <h4>Автор</h4>
         <p>{{ event.avtor }}</p>
 
 
-    <h2>Add your own feedback</h2>
-    {{ form(comment_form) }}
+        <h2>Add your own feedback</h2>
+        {{ form(comment_form) }}
 
-    {% if comments|length > 0 %}
-        <div>There are {{ comments|length }} comments.</div>
+        {% if comments|length > 0 %}
+            <div>There are {{ comments|length }} comments.</div>
 
-        {% for comment in comments %}
-{#            {% if comment.photofilename %}
+            {% for comment in comments %}
+                {# {% if comment.photofilename %}
                 <img src="{{ asset('uploads/photos/' ~ comment.photofilename) }}" />
-            {% endif %}#}
+            {% endif %} #}
 
-            <h4>{{ comment.author }}</h4>
-            <small>
-                {{ comment.createdAt|format_datetime('medium', 'short') }}
-            </small>
+                <h4>{{ comment.author }}</h4>
+                <small>
+                    {{ comment.createdAt|format_datetime('medium', 'short') }}
+                </small>
 
-            <p>{{ comment.text }}</p>
-        {% endfor %}
+                <p>{{ comment.text }}</p>
+            {% endfor %}
 
-        {% if previous >= 0 %}
-            <a href="{{ path('newstop.show', { slug: event.slug, offset: previous }) }}">Previous</a>
+            {% if previous >= 0 %}
+                <a href="{{ path('newstop.show', { slug: event.slug, offset: previous }) }}">Previous</a>
+            {% endif %}
+            {% if next < comments|length %}
+                <a href="{{ path('newstop.show', { slug: event.slug, offset: next }) }}">Next</a>
+            {% endif %}
+        {% else %}
+            <div>No comments have been posted yet for this conference.</div>
         {% endif %}
-        {% if next < comments|length %}
-            <a href="{{ path('newstop.show', { slug: event.slug, offset: next }) }}">Next</a>
-        {% endif %}
-    {% else %}
-        <div>No comments have been posted yet for this conference.</div>
-    {% endif %}
     </div>
 {% endblock %}

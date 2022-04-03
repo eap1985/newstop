@@ -11,7 +11,10 @@ services:
 
     # Явно регистриурум контроллеры бандла и репозиторий как DI-сервисы
     eap1985\NewsTopBundle\Repository\NewsTopRepository: ~
-    eap1985\NewsTopBundle\Controller\NewsTopController: ~
+    eap1985\NewsTopBundle\Controller\NewsTopController:
+        calls:
+        - [ setWo, ['@white_october_breadcrumbs']]
+
     eap1985\NewsTopBundle\Controller\NewsTopAjaxController: ~
     eap1985\NewsTopBundle\Controller\NewsTopEditorController:
         arguments:

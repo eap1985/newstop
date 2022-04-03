@@ -8,7 +8,9 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\ManagerRegistry;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -26,7 +28,10 @@ use Symfony\Component\String\Slugger\SluggerInterface;
  * @Vich\Uploadable()
  * @Assert\Callback("validate")
  * @UniqueEntity("slug")
+ * @ORM\HasLifecycleCallbacks()
  */
+
+
 class NewsTop
 {
 
@@ -38,29 +43,66 @@ class NewsTop
     private $id;
 
     /**
+     * @Gedmo\SortablePosition
+     * @ORM\Column(type="integer")
+     */
+    private $position;
+
+    /**
      * @ORM\OneToOne(targetEntity="eap1985\NewsTopBundle\Entity\NewsBody",cascade={"remove"},mappedBy="NewsBody")
      * @ORM\JoinColumns( { @ORM\JoinColumn(name="node", referencedColumnName="id", onDelete="CASCADE" ) } )
-    */
+     */
 
     private $node;
+
+    /**
+     * @ORM\PostLoad
+     * @ORM\PostPersist
+     */
+    public function fetchEntityManager(LifecycleEventArgs $args)
+    {
+        $this->setEntityManager($args->getEntityManager());
+    }
+
+    public function setEntityManager($em)
+    {
+        $this->em = $em;
+        return $this->em;
+    }
+
     // generated getter and setter
-    public function setNode(NewsBody $node = null) : NewsBody
+    public function setNode(NewsBody $node = null): NewsBody
     {
 
         $this->node = $node;
         return $this;
     }
 
-    public function getNode() {
+    public function getNode()
+    {
         return $this->node;
     }
 
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this->position = $position;
+        return $this;
+    }
+
     private $bodyValue;
+
     // generated getter and setter
 
-    public function getBodyValue($created = null) {
+    public function getBodyValue($created = null)
+    {
 
-        if(!empty($this->node)) {
+        if (!empty($this->node)) {
             return $this->node->getBodyValue();
         }
 
@@ -71,7 +113,7 @@ class NewsTop
     public function setBodyValue($string = '-')
     {
         $this->bodyValue = $string;
-        if(!empty($this->node)) $this->node->setBodyValue($string);
+        if (!empty($this->node)) $this->node->setBodyValue($string);
         return $this;
     }
 
@@ -108,7 +150,7 @@ class NewsTop
     private $slug;
 
 
-    public function createNode($conference,$entityManager)
+    public function createNode($conference, $entityManager)
     {
         $request = Request::createFromGlobals();
         $body_value = $request->request->get('body_value', 'default category');
@@ -124,7 +166,7 @@ class NewsTop
         $this->node->setRevisionId(1);
         $this->node->setDeleted(0);
         // сообщите Doctrine, что вы хотите (в итоге) сохранить Продукт (пока без запросов)
-        $entityManager->persist( $this->node);
+        $entityManager->persist($this->node);
 
         // действительно выполните запросы (например, запрос INSERT)
         $entityManager->flush();
@@ -135,7 +177,7 @@ class NewsTop
     {
 
 
-            $this->slug = (string) $slugger->slug((string) $this)->lower();
+        $this->slug = (string)$slugger->slug((string)$this)->lower();
 
     }
 
@@ -151,7 +193,8 @@ class NewsTop
         return $this;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->name;
     }
 
@@ -251,7 +294,7 @@ class NewsTop
     public function setPdfFile($pdfFile): void
     {
         $this->pdfFile = $pdfFile;
-        if($this->pdfFile) {
+        if ($this->pdfFile) {
             $this->updatedAt = new DateTime();
         }
     }
@@ -262,7 +305,7 @@ class NewsTop
      */
     public function validate(ExecutionContextInterface $context)
     {
-        if(!empty($this->pdfFile)) {
+        if (!empty($this->pdfFile)) {
             if (!in_array($this->pdfFile->getMimeType(), array(
                 'application/pdf',
             ))) {
@@ -273,7 +316,7 @@ class NewsTop
             }
         }
 
-        if(!empty($this->thumbnailFile)) {
+        if (!empty($this->thumbnailFile)) {
             if (!in_array($this->thumbnailFile->getMimeType(), array(
                 'image/jpg',
                 'image/png',
@@ -298,7 +341,7 @@ class NewsTop
     public function setThumbnail(?string $thumbnail = 'no'): self
     {
 
-        if(!empty($thumbnail)) {
+        if (!empty($thumbnail)) {
             $this->thumbnail = $thumbnail;
         } else {
             $this->thumbnail = 'no';
@@ -328,7 +371,7 @@ class NewsTop
     {
 
         $this->thumbnailFile = $thumbnailFile;
-        if($this->thumbnailFile) {
+        if ($this->thumbnailFile) {
             $this->updatedAt = new DateTime();
         }
     }
@@ -404,6 +447,11 @@ class NewsTop
      */
     private $saletype;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $attachment;
+
     public function __construct()
     {
         $this->createdAt = new DateTime();
@@ -423,10 +471,12 @@ class NewsTop
         return $this->category = $category;
         return $this;
     }
+
     public function getCategoryId()
     {
         return $this->category;
     }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -599,6 +649,56 @@ class NewsTop
     {
         $this->saletype = $saletype;
 
+        return $this;
+    }
+
+
+    public function getAttachmentSql()
+    {
+        $conn = $this->em->getConnection();
+
+            $sql = '
+            SELECT id FROM files f
+            WHERE f.node_id  = ' . $this->getId() . '
+            ORDER BY f.id DESC
+            ';
+            $stmt = $conn->prepare($sql);
+
+            $resultSet = $stmt->executeQuery();
+
+            // returns an array of arrays (i.e. a raw data set)
+            return $resultSet->fetchAllNumeric();
+
+    }
+
+    public function getAttachment(): array
+    {
+
+        $decode = json_decode($this->attachment);
+        $val = [];
+        $r = $this->getAttachmentSql();
+
+        if(!empty($r)) {
+            $newar = [];
+            foreach($r as $val => $item) {
+                 array_push($newar,$item[0]);
+            }
+
+            $val = implode(',',$newar);
+        }
+
+
+        return array('attachmenthidden' => $val);
+    }
+
+    public function setAttachment($attachment): self
+    {
+        if(!empty($attachment['attachmenthidden'])) {
+            $val = explode(',', $attachment['attachmenthidden']);
+
+            $json = json_encode(array('files' => $val));
+            $this->attachment = $json;
+        }
         return $this;
     }
 }

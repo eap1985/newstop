@@ -2,9 +2,11 @@
 
 namespace eap1985\NewsTopBundle\Controller;
 
+use App\Controller\AppController;
 use App\Entity\Comment;
 use App\Form\CommentFormType;
 use App\Message\CommentMessage;
+use App\Repository\CategoryRepository;
 use App\Service\MessageGenerator;
 use App\SpamChecker;
 use eap1985\NewsTopBundle\Entity\NewsTop;
@@ -36,22 +38,29 @@ class NewsTopController extends AbstractController
     private $enableSoftDelete;
     private $twig;
     private $bus;
+    private $breadcrumbs;
 
-    public function __construct(NewsTopRepository $eventRepository,bool $enableSoftDelete = false,Environment $twig, EntityManagerInterface $entityManager,MessageBusInterface $bus)
+    public function __construct(NewsTopRepository $eventRepository,bool $enableSoftDelete = false,Environment $twig, EntityManagerInterface $entityManager,MessageBusInterface $bus, CategoryRepository $catrep)
     {
         $this->entityManager = $entityManager;
         $this->twig = $twig;
         $this->enableSoftDelete = $enableSoftDelete;
         $this->eventRepository = $eventRepository;
         $this->bus = $bus;
+        $this->catrep = $catrep;
     }
 
+    public function setWo($positionHandler)
+    {
+        $this->breadcrumbs = $positionHandler;
+    }
 
     /**
      * @Route("/", name="index", methods={"GET"})
      */
     public function index(EntityManagerInterface $em, PaginatorInterface $paginator, Request $request): Response
     {
+
         $events = $this->eventRepository->findAll();
 
         $dql   = "SELECT n FROM NewsTopBundle:NewsTop n";
@@ -82,6 +91,7 @@ class NewsTopController extends AbstractController
         ]);
     }
 
+
     /**
      * @Route("reload-cities", name="reloadCities")
      * @param Request $request
@@ -89,7 +99,6 @@ class NewsTopController extends AbstractController
      */
     public function reloadCitiesAction(Request $request)
     {
-
         $districtid = $request->request->get('id');
         switch ( $districtid ) {
             case 0:
@@ -104,8 +113,43 @@ class NewsTopController extends AbstractController
             default:
                 $select = 20;
         }
-
         return $this->render("@NewsTop/cities.html.twig", array("select" => $select));
+    }
+
+    /**
+     * @Route("/category/{id}", name="getcategory")
+     */
+    public function category(EntityManagerInterface $em, Request $request, Environment $twig, NewsTop $conference, PaginatorInterface $paginator): Response
+    {
+        $events = $this->eventRepository->findAll();
+        $id = $request->attributes->get('id');
+
+        $dql   = "SELECT n FROM NewsTopBundle:NewsTop n WHERE n.category =".$id;
+        $query = $em->createQuery($dql);
+        foreach( $events as &$event) {
+            if($event->getSi()) {
+                $si = $event->getSi();
+                $si = '/img/'.$si;
+
+                if(!is_file($_SERVER['DOCUMENT_ROOT'].$si)) {
+                    $event->setSi('/img/defaultimg.png');
+                } else {
+                    $event->setSi($si);
+                }
+            }
+        }
+
+        $pagination = $paginator->paginate(
+            $query, /* query NOT result */
+            $request->query->getInt('page', 1), /*page number*/
+            10 /*limit per page*/
+        );
+
+        return $this->render('@NewsTop/editor/index.html.twig', [
+            'events' => $events,
+            'isSoftDeleteEnabled' => $this->enableSoftDelete,
+            'pagination' => $pagination,
+        ]);
     }
 
     /**
@@ -113,6 +157,8 @@ class NewsTopController extends AbstractController
      */
     public function show(Request $request, Environment $twig, NewsTop $conference, CommentRepository $commentRepository, $slug,SpamChecker $spamChecker,MessageGenerator $messageGenerator): Response
     {
+        // Simple example
+        $this->breadcrumbs->addItem("Home", $this->get("router")->generate("newstop.index"));
 
         $message = $messageGenerator->getHappyMessage();
         $this->addFlash('success', $message);
@@ -143,14 +189,16 @@ class NewsTopController extends AbstractController
         $offset = max(0, $request->query->getInt('offset', 0));
         $paginator = $commentRepository->getCommentPaginator($conference, $offset);
 
-
-
         $event = $this->getEvent($slug);
 
+        // Example without URL
+        $this->breadcrumbs->addItem($event->getName());
         //dd($event->getNode()->getBodyValue());
+        $select = $this->getCategory($event);
         return new Response($twig->render('@NewsTop/show.html.twig', [
             'comment_form' => $form->createView(),
             'event' => $event,
+            'select' => $select,
             'comments' => $paginator,
             'previous' => $offset - CommentRepository::PAGINATOR_PER_PAGE,
             'next' => min(count($paginator), $offset + CommentRepository::PAGINATOR_PER_PAGE),
@@ -158,15 +206,55 @@ class NewsTopController extends AbstractController
 
     }
 
+    private function getCategory($event)
+    {
 
+        $cats = $this->catrep->findAll();
+        $s = '';
+        foreach($cats as $cat) {
+            $id = $cat->getId();
+            $name = $cat->getName();
+            $opsel = '';
+
+            if($event->getCategoryId()->getId() == $id) {
+                $opsel = 'selected';
+            }
+            $s .= '<option '.$opsel.' value="'.$id.'">'.$name.'</option>';
+        }
+
+        return $cats = '<select id="categorychange" class="form-select" aria-label="Default select example">
+                    <option selected>Open this select menu</option>
+                    '.$s.'
+                </select>';
+
+    }
 
 
     private function getEvent($slug): NewsTop
     {
         if (!$event = $this->eventRepository->findBySlug($slug)) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException('Not found');
         }
 
+        $images = $this->getImage($event->getId());
+
+        $event->images = $images;
         return $event;
     }
+
+    public function getImage($id) {
+        $conn = $this->entityManager->getConnection();
+        $sql = '
+            SELECT * FROM files f
+            WHERE f.node_id  = ' . $id . '
+            ORDER BY f.id DESC
+            ';
+        $stmt = $conn->prepare($sql);
+
+        $resultSet = $stmt->executeQuery();
+
+        // returns an array of arrays (i.e. a raw data set)
+        return $resultSet->fetchAllAssociative();
+    }
+
 }
