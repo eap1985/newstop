@@ -4,7 +4,9 @@ namespace eap1985\NewsTopBundle\Controller;
 
 use App\Controller\AppController;
 use App\Entity\Comment;
+use App\Form\AddToCartType;
 use App\Form\CommentFormType;
+use App\Manager\CartManager;
 use App\Message\CommentMessage;
 use App\Repository\CategoryRepository;
 use App\Service\MessageGenerator;
@@ -60,8 +62,7 @@ class NewsTopController extends AbstractController
      */
     public function index(EntityManagerInterface $em, PaginatorInterface $paginator, Request $request): Response
     {
-
-        $events = $this->eventRepository->findAll();
+       $events = $this->eventRepository->findAll();
 
         $dql   = "SELECT n FROM NewsTopBundle:NewsTop n";
         $query = $em->createQuery($dql);
@@ -155,8 +156,23 @@ class NewsTopController extends AbstractController
     /**
      * @Route("/{slug}.html", name="show")
      */
-    public function show(Request $request, Environment $twig, NewsTop $conference, CommentRepository $commentRepository, $slug,SpamChecker $spamChecker,MessageGenerator $messageGenerator): Response
+    public function show(Request $request, Environment $twig, NewsTop $product, CommentRepository $commentRepository, $slug,SpamChecker $spamChecker,MessageGenerator $messageGenerator,CartManager $cartManager): Response
     {
+
+        $addtocartform = $this->createForm(AddToCartType::class);
+        $addtocartform->handleRequest($request);
+
+        if ($addtocartform->isSubmitted() && $addtocartform->isValid()) {
+            $item = $addtocartform->getData();
+            $item->setProduct($product);
+            $cart = $cartManager->getCurrentCart();
+            $cart
+                ->addItem($item)
+                ->setUpdatedAt(new \DateTime());
+            $cartManager->save($cart);
+            return $this->redirectToRoute('newstop.show', ['slug' => $product->getSlug()]);
+        }
+
         // Simple example
         $this->breadcrumbs->addItem("Home", $this->get("router")->generate("newstop.index"));
 
@@ -168,7 +184,7 @@ class NewsTopController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setNewsTop($conference);
+            $comment->setNewsTop($product);
 
             $this->entityManager->persist($comment);
             $this->entityManager->flush();
@@ -182,12 +198,11 @@ class NewsTopController extends AbstractController
 
             $this->bus->dispatch(new CommentMessage($comment->getId(), $context));
 
-            return $this->redirectToRoute('newstop.show', ['slug' => $conference->getSlug()
-            ]);
+            return $this->redirectToRoute('newstop.show', ['slug' => $product->getSlug()]);
         }
 
         $offset = max(0, $request->query->getInt('offset', 0));
-        $paginator = $commentRepository->getCommentPaginator($conference, $offset);
+        $paginator = $commentRepository->getCommentPaginator($product, $offset);
 
         $event = $this->getEvent($slug);
 
@@ -196,6 +211,7 @@ class NewsTopController extends AbstractController
         //dd($event->getNode()->getBodyValue());
         $select = $this->getCategory($event);
         return new Response($twig->render('@NewsTop/show.html.twig', [
+            'form' => $addtocartform->createView(),
             'comment_form' => $form->createView(),
             'event' => $event,
             'select' => $select,

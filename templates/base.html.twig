@@ -5,10 +5,8 @@
     <title>{% block newstop_title %}{% endblock %}</title>
     {% block newstop_stylesheets %}
         {{ encore_entry_link_tags('app') }}
-
     {% endblock %}
-
-    <link rel="stylesheet" type="text/css" href="/slider/css/component.css" />
+    <link rel="stylesheet" type="text/css" href="/slider/css/component.css"/>
 </head>
 <body class="mrg">
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
@@ -62,25 +60,39 @@
                 <button class="btn btn-outline-success" type="submit">Поиск</button>
             </form>
 
-            <a href="{{ path('sonata_admin_dashboard') }}" class="nav-link"><i class="fas fa-cart-plus"></i> Корзина</a>
-
+            <a href="{{ path('cart') }}" class="nav-link">
+            <button type="button" class="btn btn-primary position-relative">
+                <i class="fas fa-cart-plus"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <span id="totalcart">0</span>
+    <span class="visually-hidden"></span>
+  </span>
+            </button></a>
         </div>
     </div>
+
 </nav>
 
 
 {% if app.request.get('_route') == 'index' %}
-<div id="cbp-fwslider" class="cbp-fwslider">
-    <ul>
-        <li><div><img src="{{ asset('slider/images/1.png') }}" alt="img01"/></div></li>
-        <li><a href="#"><img class="hidden" src="{{ asset('slider/images/2.png') }}" alt="img02"/></a></li>
-        <li><a href="#"><img class="hidden" src="{{ asset('slider/images/3.png') }}" alt="img03"/></a></li>
+    <div id="cbp-fwslider" class="cbp-fwslider">
+        <ul>
+            <li>
+                <div><img src="{{ asset('slider/images/1.png') }}" alt="img01"/></div>
+            </li>
+            <li><a href="#"><img class="hidden" src="{{ asset('slider/images/2.png') }}" alt="img02"/></a></li>
+            <li><a href="#"><img class="hidden" src="{{ asset('slider/images/3.png') }}" alt="img03"/></a></li>
 
 
-    </ul>
-</div>
+        </ul>
+    </div>
 {% endif %}
-<div class="container">
+{% set class = '' %}
+{% if app.request.get('_route') != 'index' %}
+    {% set class = 'main' %}
+{% endif %}
+
+<div class="container {{ class  }}">
     <nav aria-label="breadcrumb">
         {{ wo_render_breadcrumbs() }}
     </nav>
@@ -92,64 +104,93 @@
         </div>
     {% endfor %}
     <div class="row">
-        <div class="col-3">
+        {% if app.request.get('_route') != 'cart' %}
+            <div class="col-3">
 
-            <div class="accordion" id="accordion">
-                <h4 class="accordion-header" id="headingOne">
-                    Accordion Item #1
-                </h4>
-                <div class="accordion-item">
+                <div class="accordion" id="accordion">
+                    <h4 class="accordion-header" id="headingOne">
+                        Accordion Item #1
+                    </h4>
+                    <div class="accordion-item">
 
-                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                         data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <strong>This is the first item's accordion body.</strong> It is shown by default, until the
-                            collapse plugin adds the appropriate classes that we use to style each element. These
-                            classes control the overall appearance, as well as the showing and hiding via CSS
-                            transitions. You can modify any of this with custom CSS or overriding our default variables.
-                            It's also worth noting that just about any HTML can go within the
-                            <code>.accordion-body</code>, though the transition does limit overflow.
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                             data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the first item's accordion body.</strong> It is shown by default, until
+                                the
+                                collapse plugin adds the appropriate classes that we use to style each element. These
+                                classes control the overall appearance, as well as the showing and hiding via CSS
+                                transitions. You can modify any of this with custom CSS or overriding our default
+                                variables.
+                                It's also worth noting that just about any HTML can go within the
+                                <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="accordion-header" id="headingTwo">
+                        Accordion Item #2
+                    </h4>
+                    <div class="accordion-item">
+
+                        <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo"
+                             data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the second item's accordion body.</strong> It is hidden by default,
+                                until
+                                the collapse plugin adds the appropriate classes that we use to style each element.
+                                These
+                                classes control the overall appearance, as well as the showing and hiding via CSS
+                                transitions. You can modify any of this with custom CSS or overriding our default
+                                variables.
+                                It's also worth noting that just about any HTML can go within the
+                                <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="accordion-header" id="headingThree">
+                        Accordion Item #3
+                    </h4>
+                    <div class="accordion-item">
+
+                        <div id="collapseThree" class="accordion-collapse collapse show" aria-labelledby="headingThree"
+                             data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the third item's accordion body.</strong> It is hidden by default, until
+                                the
+                                collapse plugin adds the appropriate classes that we use to style each element. These
+                                classes control the overall appearance, as well as the showing and hiding via CSS
+                                transitions. You can modify any of this with custom CSS or overriding our default
+                                variables.
+                                It's also worth noting that just about any HTML can go within the
+                                <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
                         </div>
                     </div>
                 </div>
-                <h4 class="accordion-header" id="headingTwo">
-                    Accordion Item #2
-                </h4>
-                <div class="accordion-item">
+                <br>
+                <div class="privilege-program__content js-privilege-program">
+                    <a class="privilege-program__link" href="/sale/online/?privilege=1&amp;action=paging&amp;utm_source=glavnaya&amp;utm_medium=saydbar&amp;utm_campaign=programma_privilegiy" target="_blank"></a>
+                    <div class="privilege-program__text">
+                        Товары со скидками							</div>
+                    <div class="privilege-program__info">
 
-                    <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo"
-                         data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <strong>This is the second item's accordion body.</strong> It is hidden by default, until
-                            the collapse plugin adds the appropriate classes that we use to style each element. These
-                            classes control the overall appearance, as well as the showing and hiding via CSS
-                            transitions. You can modify any of this with custom CSS or overriding our default variables.
-                            It's also worth noting that just about any HTML can go within the
-                            <code>.accordion-body</code>, though the transition does limit overflow.
-                        </div>
-                    </div>
-                </div>
-                <h4 class="accordion-header" id="headingThree">
-                    Accordion Item #3
-                </h4>
-                <div class="accordion-item">
-
-                    <div id="collapseThree" class="accordion-collapse collapse show" aria-labelledby="headingThree"
-                         data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <strong>This is the third item's accordion body.</strong> It is hidden by default, until the
-                            collapse plugin adds the appropriate classes that we use to style each element. These
-                            classes control the overall appearance, as well as the showing and hiding via CSS
-                            transitions. You can modify any of this with custom CSS or overriding our default variables.
-                            It's also worth noting that just about any HTML can go within the
-                            <code>.accordion-body</code>, though the transition does limit overflow.
+                        <div class="privilege-program__discount">
+                            <div class="privilege-program__prefix">
+                                <div class="privilege-program__text-prefix">до</div>
+                                <div class="privilege-program__minus-prefix">-</div>
+                            </div>
+                            <div class="privilege-program__number">40</div>
+                            <div class="privilege-program__percent">%</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-9">
+        {% endif %}
+        {% set col = 'col-9' %}
+        {% if app.request.get('_route') == 'cart' %}
+            {% set col = 'col-12' %}
+        {% endif %}
+        <div class="{{ col }}">
             <div class="content">
                 {% block newstop_body %}{% endblock %}
 
@@ -181,16 +222,17 @@
         <div class="bottom-line border-bottom"></div>
         <div class="row">
             <div class="col-3 ">
-            <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/"
-               aria-label="Логотип">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" class="d-block me-2" viewBox="0 0 118 94"
-                     role="img"><title>Логотип</title>
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                          d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z"
-                          fill="currentColor"></path>
-                </svg>
-                <span class="fs-5">Логотип</span>
-            </a>
+                <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/"
+                   aria-label="Логотип">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" class="d-block me-2"
+                         viewBox="0 0 118 94"
+                         role="img"><title>Логотип</title>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z"
+                              fill="currentColor"></path>
+                    </svg>
+                    <span class="fs-5">Логотип</span>
+                </a>
 
 
                 <ul class="list-unstyled small text-muted">

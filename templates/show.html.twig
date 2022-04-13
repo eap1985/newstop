@@ -27,27 +27,52 @@
                     <div class="event__info-block event-place"><i class="fas fa-tags"></i> {{ event.razdel }}</div>
                 {% endif %}
                 {% if event.categoryId is not empty %}
-                    <div class="event__info-block event-place"><i class="fas fa-list"></i> {#{{ event.categoryId }}#}</div>
-                <div class="event__info-block event-place">
-                    {{ select | raw }}
-                </div>
+                    <div class="event__info-block event-place"><i class="fas fa-list"></i> {# {{ event.categoryId }} #}
+                    </div>
+                    <div class="event__info-block event-place">
+                        {{ select | raw }}
+                    </div>
                 {% endif %}
             </div>
         </div>
 
         <hr>
-
-        <div>
-            {{ event.opisanie | raw }}
-        </div>
-        {% if event.node is not null and event.bodyValue is not null %}
+        {% if event.node is null or event.bodyValue is null %}
             <div>
-                {{ event.bodyValue | raw }}
+                {{ event.opisanie | raw }}
             </div>
         {% endif %}
+        <div>
+            <div class="" style="width:70%;float:left;">
+                {% if event.node is not null and event.bodyValue is not null %}
+                    <div>
+                        {{ event.bodyValue | raw }}
+                    </div>
 
+                {% endif %}
+            </div>
+            <div class="float-left" style="width:30%;float:left;">
+                <span class="h5 mt-auto">{{ event.price }} &#x20bd; </span>
+                {{ form_start(form, {'attr': {'class': 'mt-4 p-4 bg-light'}}) }}
+                <div class="form-group">
+                    {{ form_label(form.quantity) }}
+                    {{ form_widget(form.quantity, {
+                        'attr': {
+                            'class': 'form-control ' ~ (form.quantity.vars.valid ? '' : 'is-invalid')
+                        }
+                    }) }}
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.quantity) }}
+                    </div>
+                </div>
+                <br>
+                {{ form_widget(form.add, {'attr': {'class': 'btn btn-warning'}}) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
+        <div style="clear:both;"></div>
         {% for image in event.images %}
-            {% dump(image) %}
+
             <div style="float:left;margin-right: 5px"><a href="{{ image.url }}{{ image.name }}" class="group1"><img
                             class="img-thumbnail" src="{{ asset(image.thumbnailurl) }}"/> </a></div>
         {% endfor %}

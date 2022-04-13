@@ -4,17 +4,13 @@ namespace eap1985\NewsTopBundle\Entity;
 
 use App\Entity\Comment;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\Persistence\ManagerRegistry;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Sonata\AdminBundle\Datagrid\ListMapper;
-use Sonata\AdminBundle\Show\ShowMapper;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Imagine\Gd\Imagine;
+use Imagine\Image\Box;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
@@ -30,8 +26,6 @@ use Symfony\Component\String\Slugger\SluggerInterface;
  * @UniqueEntity("slug")
  * @ORM\HasLifecycleCallbacks()
  */
-
-
 class NewsTop
 {
 
@@ -148,6 +142,12 @@ class NewsTop
      *
      */
     private $slug;
+
+
+    /**
+     *
+     */
+    private $image;
 
 
     public function createNode($conference, $entityManager)
@@ -452,6 +452,11 @@ class NewsTop
      */
     private $attachment;
 
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $price;
+
     public function __construct()
     {
         $this->createdAt = new DateTime();
@@ -657,17 +662,17 @@ class NewsTop
     {
         $conn = $this->em->getConnection();
 
-            $sql = '
+        $sql = '
             SELECT id FROM files f
             WHERE f.node_id  = ' . $this->getId() . '
             ORDER BY f.id DESC
             ';
-            $stmt = $conn->prepare($sql);
+        $stmt = $conn->prepare($sql);
 
-            $resultSet = $stmt->executeQuery();
+        $resultSet = $stmt->executeQuery();
 
-            // returns an array of arrays (i.e. a raw data set)
-            return $resultSet->fetchAllNumeric();
+        // returns an array of arrays (i.e. a raw data set)
+        return $resultSet->fetchAllNumeric();
 
     }
 
@@ -678,13 +683,13 @@ class NewsTop
         $val = [];
         $r = $this->getAttachmentSql();
 
-        if(!empty($r)) {
+        if (!empty($r)) {
             $newar = [];
-            foreach($r as $val => $item) {
-                 array_push($newar,$item[0]);
+            foreach ($r as $val => $item) {
+                array_push($newar, $item[0]);
             }
 
-            $val = implode(',',$newar);
+            $val = implode(',', $newar);
         }
 
 
@@ -693,7 +698,7 @@ class NewsTop
 
     public function setAttachment($attachment): self
     {
-        if(!empty($attachment['attachmenthidden'])) {
+        if (!empty($attachment['attachmenthidden'])) {
             $val = explode(',', $attachment['attachmenthidden']);
 
             $json = json_encode(array('files' => $val));
@@ -701,4 +706,47 @@ class NewsTop
         }
         return $this;
     }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(float $price): self
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+
+    public function getCartImage(): ?string
+    {
+         return $this->cartimage;
+    }
+
+    public function setCartImage(string $cartimage): self
+    {
+        $this->cartimage = $cartimage;
+
+        return $this;
+    }
+
+
+
+
+
 }
